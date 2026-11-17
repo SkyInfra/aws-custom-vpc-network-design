@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="940" viewBox="0 0 1500 940" role="img" aria-labelledby="title desc">
+<title id="title">IT-SIMPLERA AWS custom VPC architecture</title>
+<desc id="desc">A VPC across two Availability Zones with public and private subnets in each zone, an Internet Gateway and separate public and private route tables.</desc>
+<defs>
+  <style>
+    .h{font:700 30px Arial;fill:#172554}.sub{font:16px Arial;fill:#334155}.small{font:14px Arial;fill:#334155}.tiny{font:12px Arial;fill:#475569}
+    .vpc{fill:#f8fafc;stroke:#334155;stroke-width:3;stroke-dasharray:10 7}.az{fill:#eef2ff;stroke:#818cf8;stroke-width:2;rx:18}
+    .pub{fill:#dbeafe;stroke:#2563eb;stroke-width:2;rx:14}.priv{fill:#dcfce7;stroke:#16a34a;stroke-width:2;rx:14}
+    .route{fill:#fff;stroke:#64748b;stroke-width:1.5;rx:10}.igw{fill:#fef3c7;stroke:#d97706;stroke-width:2;rx:12}
+    .line{stroke:#475569;stroke-width:3;fill:none}.dash{stroke:#64748b;stroke-width:2;stroke-dasharray:7 6;fill:none}
+  </style>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#475569"/></marker>
+</defs>
+<rect width="1500" height="940" fill="#fff"/>
+<text x="750" y="52" text-anchor="middle" class="h">IT-SIMPLERA SOLUTIONS | AWS Custom VPC</text>
+<text x="750" y="82" text-anchor="middle" class="sub">Region: us-east-1 (N. Virginia) • VPC: 10.20.0.0/16</text>
+
+<rect x="40" y="125" width="1420" height="770" class="vpc"/>
+<text x="70" y="165" class="h" style="font-size:22px">IT-SIMPLERA-VPC — vpc-0b28a4a82969d27b2</text>
+
+<rect x="75" y="205" width="650" height="625" class="az"/>
+<text x="400" y="242" text-anchor="middle" class="h" style="font-size:22px">Availability Zone us-east-1a</text>
+<rect x="775" y="205" width="650" height="625" class="az"/>
+<text x="1100" y="242" text-anchor="middle" class="h" style="font-size:22px">Availability Zone us-east-1b</text>
+
+<rect x="115" y="280" width="570" height="225" class="pub"/>
+<text x="400" y="315" text-anchor="middle" class="h" style="font-size:21px">Public-1 • 10.20.1.0/24</text>
+<text x="400" y="345" text-anchor="middle" class="small">Public EC2 • 10.20.1.249</text>
+<text x="400" y="370" text-anchor="middle" class="small">Public IPv4: 100.31.120.30</text>
+<rect x="265" y="395" width="270" height="75" class="route"/>
+<text x="400" y="425" text-anchor="middle" class="small">Public route table</text>
+<text x="400" y="450" text-anchor="middle" class="tiny">0.0.0.0/0 → Internet Gateway</text>
+
+<rect x="115" y="555" width="570" height="225" class="priv"/>
+<text x="400" y="590" text-anchor="middle" class="h" style="font-size:21px">Private-1 • 10.20.2.0/24</text>
+<text x="400" y="625" text-anchor="middle" class="small">Private EC2 • 10.20.2.209</text>
+<text x="400" y="650" text-anchor="middle" class="small">No public IPv4 address</text>
+<rect x="265" y="680" width="270" height="75" class="route"/>
+<text x="400" y="710" text-anchor="middle" class="small">Private route table</text>
+<text x="400" y="735" text-anchor="middle" class="tiny">VPC local route only • no NAT</text>
+
+<rect x="815" y="280" width="570" height="225" class="pub"/>
+<text x="1100" y="315" text-anchor="middle" class="h" style="font-size:21px">Public-2 • 10.20.3.0/24</text>
+<text x="1100" y="350" text-anchor="middle" class="small">Public subnet • AZ coverage</text>
+<rect x="965" y="395" width="270" height="75" class="route"/>
+<text x="1100" y="425" text-anchor="middle" class="small">Public route table</text>
+<text x="1100" y="450" text-anchor="middle" class="tiny">0.0.0.0/0 → Internet Gateway</text>
+
+<rect x="815" y="555" width="570" height="225" class="priv"/>
+<text x="1100" y="590" text-anchor="middle" class="h" style="font-size:21px">Private-2 • 10.20.4.0/24</text>
+<text x="1100" y="625" text-anchor="middle" class="small">Private subnet • AZ coverage</text>
+<rect x="965" y="680" width="270" height="75" class="route"/>
+<text x="1100" y="710" text-anchor="middle" class="small">Private route table</text>
+<text x="1100" y="735" text-anchor="middle" class="tiny">VPC local route only • no NAT</text>
+
+<rect x="585" y="105" width="330" height="65" class="igw"/>
+<text x="750" y="133" text-anchor="middle" class="h" style="font-size:19px">Internet Gateway</text>
+<text x="750" y="155" text-anchor="middle" class="tiny">IT-SIMPLERA-IGW • attached</text>
+<path d="M650 170 L400 395" class="line" marker-end="url(#arrow)"/>
+<path d="M850 170 L1100 395" class="line" marker-end="url(#arrow)"/>
+
+<text x="750" y="865" text-anchor="middle" class="small">Public tier: internet route via IGW • Private tier: no direct internet route</text>
+</svg>
