@@ -1,21 +1,20 @@
-# Submission Evidence
+# Implementation Evidence
 
-Store the original screenshots captured from the AWS console and terminal in this directory.
+This directory is intended to hold the AWS console and terminal screenshots captured during implementation.
 
-Recommended filenames:
+## Evidence source
 
-1. `01-vpc-details.png`
-2. `02-subnets-and-availability-zones.png`
-3. `03-internet-gateway-attached.png`
-4. `04-public-route-table.png`
-5. `05-private-route-table.png`
-6. `06-public-security-group.png`
-7. `07-private-security-group-inbound.png`
-8. `08-private-security-group-outbound.png`
-9. `09-ec2-instance-details.png`
-10. `10-nginx-and-connectivity-tests.png`
-11. `11-dns-https-and-blocked-traffic.png`
+The original evidence document is an 11-page Word-exported PDF supplied in the conversation. It contains captures of:
+- VPC details and the four-subnet resource map
+- Subnet inventory and subnet details
+- Route-table inventory, routes, and associations
+- Security-group details and rules
+- Public EC2 instance details and SSH session
+- Nginx landing page
+- Ping, TCP 8080, TCP 80, DNS, and HTTPS validation
 
-Use readable, original screenshots. Do not include private keys, passwords, access tokens, or other secrets.
+## Evidence limitations
 
-The private security group's outbound rules must be captured clearly from the live AWS console. The previous evidence copy did not make that tab legible enough to verify.
+- Screenshots are historical evidence captured during implementation. They do not imply that resources are still running; the environment may be deleted after evidence capture.
+- The private security group's outbound rules should be checked against the live console if the instructor specifically requires proof of that tab. Do not claim a rule is verified if it is not legible in the capture.
+- No private keys, passwords, or access tokens should be included.
