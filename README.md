@@ -1,54 +1,168 @@
 # AWS Custom VPC Network Design
 
-A practical AWS networking implementation in **US East (N. Virginia), `us-east-1`**. This project documents a custom VPC, four subnets across two Availability Zones, public and private routing, security groups, EC2 connectivity, and validation tests.
+A hands-on AWS networking project that builds and validates a custom Virtual Private Cloud (VPC), public and private subnets across two Availability Zones, routing, security boundaries, and EC2 connectivity.
 
-## Architecture
+> **Region:** US East (N. Virginia) — `us-east-1`  
+> **Focus:** VPC networking, subnet isolation, route tables, Internet Gateway, security groups, EC2, and connectivity validation.
+
+## 1. Project architecture
 
 ![AWS custom VPC network architecture](diagrams/aws-vpc-architecture.svg)
 
-The diagram is intentionally project-focused: it shows the AWS resources and traffic paths without organization or assignment-provider branding. The editable SVG is available at [`diagrams/aws-vpc-architecture.svg`](diagrams/aws-vpc-architecture.svg).
+The design uses one VPC with four subnets across two Availability Zones. Public subnets use an Internet Gateway route. Private subnets use a separate route table with only the VPC-local route; no NAT Gateway was deployed.
 
-## Implemented network
+## 2. Network design
 
-| Component | Configuration |
+| Resource | Configuration |
 |---|---|
-| VPC | `10.20.0.0/16` (`vpc-0b28a4a82969d27b2`) |
+| VPC | `10.20.0.0/16` |
 | Availability Zones | `us-east-1a`, `us-east-1b` |
 | Public subnet A | `10.20.1.0/24` — `us-east-1a` |
 | Private subnet A | `10.20.2.0/24` — `us-east-1a` |
 | Public subnet B | `10.20.3.0/24` — `us-east-1b` |
 | Private subnet B | `10.20.4.0/24` — `us-east-1b` |
 | Internet Gateway | Attached to the VPC |
-| Public route table | VPC local route + `0.0.0.0/0` to the Internet Gateway; associated with both public subnets |
-| Private route table | VPC local route only; associated with both private subnets |
-| Public EC2 | `10.20.1.249`, public IPv4 `100.31.120.30`, Nginx |
-| Private EC2 | `10.20.2.209`, no public IPv4 address |
+| Public route table | VPC-local route and `0.0.0.0/0` to the Internet Gateway |
+| Private route table | VPC-local route only |
 
-A NAT Gateway was not deployed. The private subnets therefore have no default route to the internet.
+### VPC overview
 
-## Validation results
+The VPC uses the `10.20.0.0/16` address range. DNS resolution and DNS hostnames were enabled.
 
-- SSH access to the public EC2 instance succeeded from the permitted administrative source.
-- Ping from the public EC2 instance to the private EC2 instance succeeded (4 packets received).
-- TCP 8080 returned `Connection refused`: the host was reachable, but no service was listening on that port.
-- TCP 80 from the public EC2 instance to the private EC2 instance timed out, consistent with the absence of a matching private security-group ingress rule.
-- DNS resolution and outbound HTTPS from the public EC2 instance succeeded; `curl -I https://example.com` returned HTTP 200.
-- The public Nginx landing page loaded successfully.
+![VPC overview](evidence/01-vpc-overview.jpg)
 
-See [`docs/connectivity-tests.md`](docs/connectivity-tests.md) for commands and interpretation, and [`docs/security-groups.md`](docs/security-groups.md) for the configured access rules.
+### Subnet layout
 
-## Repository guide
+Four subnets were created across two Availability Zones to separate public-facing and private workloads.
 
-- [`docs/network-design.md`](docs/network-design.md) — VPC, subnet plan, and routing.
-- [`docs/security-groups.md`](docs/security-groups.md) — security-group rules and rationale.
-- [`docs/connectivity-tests.md`](docs/connectivity-tests.md) — terminal tests and results.
-- [`docs/cost-and-cleanup.md`](docs/cost-and-cleanup.md) — cost decisions and cleanup steps.
-- [`docs/demo-guide.md`](docs/demo-guide.md) — instructor demonstration sequence.
-- [`diagrams/aws-vpc-architecture.svg`](diagrams/aws-vpc-architecture.svg) — editable architecture diagram.
-- [`evidence/README.md`](evidence/README.md) — evidence index and screenshot gallery.
+![Subnets overview](evidence/02-subnets-overview.png)
 
-## Evidence
+**Public subnet — Availability Zone A**
 
-Evidence was supplied in an 11-page document. The repository's evidence index identifies the console and terminal captures and their relevance. These are historical screenshots captured during implementation; the AWS resources may be deleted after evidence collection. Confirm the private security group's outbound rules in the live console if your instructor requires a clear screenshot of that specific tab.
+![Public subnet details](evidence/03-public-subnet-details.jpg)
 
-Do not commit private keys, passwords, access tokens, or other credentials.
+**Private subnet — Availability Zone A**
+
+![Private subnet details](evidence/04-private-subnet-details.jpg)
+
+## 3. Internet Gateway and route tables
+
+The Internet Gateway is attached to the VPC. The public route table sends internet-bound IPv4 traffic to the gateway. The private route table has no internet default route.
+
+### Internet Gateway
+
+![Internet Gateway](evidence/05-internet-gateway.jpg)
+
+### Public route table
+
+![Public route table](evidence/06-public-route-table.jpg)
+
+### Private route table
+
+![Private route table](evidence/07-private-route-table.jpg)
+
+### Subnet associations
+
+The public subnets are associated with the public route table, and the private subnets are associated with the private route table.
+
+![Route table associations](evidence/08-route-table-associations.jpg)
+
+## 4. Security groups
+
+Security groups control traffic at the EC2 network interface. The public security group permits web traffic and restricts SSH to the administrator's public IP address. The private security group permits the intended application/test traffic from the public security group.
+
+### Public security group
+
+![Public security group rules](evidence/09-public-security-group.jpg)
+
+### Private security group
+
+![Private security group rules](evidence/10-private-security-group.jpg)
+
+Refer to [the security-group documentation](docs/security-groups.md) for the rule descriptions and security rationale.
+
+## 5. EC2 deployment
+
+Two Ubuntu EC2 instances were deployed in the VPC:
+
+| Instance | Subnet | Private IPv4 | Public IPv4 |
+|---|---|---:|---:|
+| Public EC2 | Public subnet A | `10.20.1.249` | `100.31.120.30` |
+| Private EC2 | Private subnet A | `10.20.2.209` | None |
+
+The public instance hosted an Nginx landing page. The private instance had no public IPv4 address.
+
+### Public EC2 instance details
+
+![Public EC2 details](evidence/12-public-ec2-details.jpg)
+
+### Private EC2 instance details
+
+![Private EC2 details](evidence/13-private-ec2-details.jpg)
+
+## 6. Connectivity and application tests
+
+The following evidence was captured while the instances were running. These results demonstrate both successful connectivity and intentionally restricted traffic.
+
+### SSH to the public instance
+
+SSH access to the public EC2 instance succeeded using the permitted administrative source.
+
+![SSH connection to public EC2](evidence/14-public-ec2-ssh.jpg)
+
+### Nginx web server
+
+The Nginx landing page was reachable through the public instance's public IPv4 address.
+
+![Nginx landing page](evidence/15-nginx-web-server.jpg)
+
+### ICMP connectivity to the private instance
+
+Ping from the public EC2 instance to `10.20.2.209` succeeded, with all four packets received.
+
+![Ping test to private EC2](evidence/16-private-instance-ping-test.jpg)
+
+### Interpreting the port tests
+
+The recorded TCP tests have different meanings:
+
+- **TCP 8080 — Connection refused:** the destination host responded, but no application was listening on that port. This is not evidence of a security-group timeout.
+- **TCP 80 — Connection timed out:** the connection did not complete, consistent with the private security group not allowing that inbound traffic from the public instance.
+
+See [connectivity test notes](docs/connectivity-tests.md) for the commands and interpretation.
+
+## 7. Internet connectivity validation
+
+The public instance successfully resolved an external DNS name and established outbound HTTPS connectivity. The HTTPS request returned an HTTP success response.
+
+A NAT Gateway was intentionally not created to avoid unnecessary charges. Consequently, the private subnet has no internet egress route in this design.
+
+## 8. Key outcomes
+
+- Designed a custom VPC using a structured CIDR allocation.
+- Created four public/private subnets across two Availability Zones.
+- Configured and associated separate public and private route tables.
+- Attached an Internet Gateway and configured public-subnet internet routing.
+- Applied security-group rules to control instance-to-instance traffic.
+- Deployed public and private EC2 instances.
+- Hosted and verified an Nginx page on the public instance.
+- Tested SSH, ICMP, TCP connectivity, DNS resolution, and outbound HTTPS.
+- Documented the network design, security rules, test results, and cleanup process.
+
+## 9. Documentation
+
+| Document | Description |
+|---|---|
+| [Network design](docs/network-design.md) | VPC, CIDR plan, subnets, and routing |
+| [Security groups](docs/security-groups.md) | Inbound/outbound rules and rationale |
+| [Connectivity tests](docs/connectivity-tests.md) | Test commands, results, and interpretation |
+| [Cost and cleanup](docs/cost-and-cleanup.md) | Cost-conscious choices and resource cleanup |
+| [Demo guide](docs/demo-guide.md) | Suggested instructor demonstration sequence |
+| [Architecture diagram](diagrams/aws-vpc-architecture.svg) | Editable network diagram |
+| [Evidence index](evidence/README.md) | Screenshot inventory |
+
+## 10. Evidence and resource status
+
+The screenshots in the `evidence/` directory are implementation-time evidence. They document the configuration and tests as they existed when captured. The AWS resources may subsequently be deleted to prevent ongoing charges; deleting resources does not invalidate the historical screenshots.
+
+**Security note:** Never commit private keys, passwords, access tokens, or other credentials to this repository.
